@@ -3,7 +3,7 @@ import numpy as np
 from numba import jit
 
 # Constants
-WIDTH, HEIGHT = 1200, 800
+WIDTH, HEIGHT = 1920, 1080
 NUM_TYPES = 6
 COLOR_STEP = 360 // NUM_TYPES
 NUM_PARTICLES = 2000
