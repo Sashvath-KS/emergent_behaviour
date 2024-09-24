@@ -141,111 +141,120 @@ def update_display():
     text_particles_input = font.render(str(NUM_PARTICLES), False, font_color)
     control_panel.blit(text_particles_input, (textbox_noofpart.x + 5, textbox_noofpart.y+ 5))
     control_panel.blit(text_noofpart, (5,20))
-    print("Reaching here 1")
 
     #Update display for types of particles
     pygame.draw.rect(control_panel, (75,84,92), textbox_typespart)
     text_types_input = font.render(str(NUM_TYPES), False, font_color)
     control_panel.blit(text_types_input, (textbox_typespart.x + 5, textbox_typespart.y+ 5))
     control_panel.blit(text_typespart, (5,50))
-    print("Reaching here 2")
 
     #Update display for force
     pygame.draw.rect(control_panel, (75,84,92), textbox_force)
     text_force_input = font.render(str(force), False, font_color)
     control_panel.blit(text_force_input, (textbox_force.x + 5, textbox_force.y+ 5))
     control_panel.blit(text_force, (5,80))
-    print("Reaching here 3")
-
+    
     
     
 
 ############################################################################################################################3
 
-def main(NUM_PARTICLES):
+#def main(NUM_PARTICLES):
     
-    #To fix the error
-    active_force = False
-    active_particles = False
-    active_types = False
+#To fix the error
+active_force = False
+active_particles = False
+active_types = False
 
-    # Create particles
-    positions = np.random.rand(NUM_PARTICLES, 2) * [WIDTH, HEIGHT]
-    velocities = np.zeros((NUM_PARTICLES, 2))
-    types = np.random.randint(0, NUM_TYPES, NUM_PARTICLES)
-    forces, min_distances, radii = set_parameters()
+# Create particles
+positions = np.random.rand(NUM_PARTICLES, 2) * [WIDTH, HEIGHT]
+velocities = np.zeros((NUM_PARTICLES, 2))
+types = np.random.randint(0, NUM_TYPES, NUM_PARTICLES)
+forces, min_distances, radii = set_parameters()
 
-    # Main game loop
-    running = True
 
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if active_particles:####################################################   Control Panel UI Stuff starts here
-                    if event.key == pygame.K_BACKSPACE:
-                        NUM_PARTICLES= int(NUM_PARTICLES/10)
-                    else:
-                        number = event.key - pygame.K_0
-                        NUM_PARTICLES = (NUM_PARTICLES*10)+number
-                        if NUM_PARTICLES> particles_limit:
-                            NUM_PARTICLES = particles_limit
-                if active_types:
-                    if event.key == pygame.K_BACKSPACE:
-                        types = int(types/10)
-                    else:
-                        number = event.key - pygame.K_0
-                        types = (types*10)+number
-                        if types>types_limit:
-                            types = types_limit
-                if active_force:
-                    if event.key == pygame.K_BACKSPACE:
-                        force = int(force/10)
-                    else:
-                        number = event.key - pygame.K_0
-                        force = (force*10)+number
-                        if force>types_limit:
-                            types = types_limit #################################### Control Panel UI stuff ends here
-                if event.key == pygame.K_r:
-                    forces, min_distances, radii = set_parameters()
-                elif event.key == pygame.K_ESCAPE:
-                    running = False
-            ######################### <Control Panel>
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if textbox_noofpart.collidepoint(event.pos): 
-                    active_particles = True
-                    active_types = False
-                    active_force = False
-                    
-                elif textbox_typespart.collidepoint(event.pos):
-                    active_particles = False
-                    active_types = True
-                    active_force = False
 
-                elif textbox_force.collidepoint(event.pos):
-                    active_force= True
-                    active_particles = False
-                    active_types = False
+
+# Main game loop
+running = True
+
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if active_particles:####################################################   Control Panel UI Stuff starts here
+                
+                if event.key == pygame.K_BACKSPACE:
+                    NUM_PARTICLES= int(NUM_PARTICLES/10)
                 else:
-                    active_particles = False
-                    active_types = False
-                    active_force = False
-        ##################################### </Control Panel>
-        particles_display.fill((0, 0, 0))  # Clear screen with black
-        update_display()
-        positions, velocities = update_particles(positions, velocities, types, forces, min_distances, radii)
+                    number = event.key - pygame.K_0
+                    NUM_PARTICLES = (NUM_PARTICLES*10)+number
+                    if NUM_PARTICLES> particles_limit:
+                        NUM_PARTICLES = particles_limit
+                # Recreates all the particles with updated value for the number of particles
+                positions = np.random.rand(NUM_PARTICLES, 2) * [WIDTH, HEIGHT]
+                velocities = np.zeros((NUM_PARTICLES, 2))
+                types = np.random.randint(0, NUM_TYPES, NUM_PARTICLES)
+                forces, min_distances, radii = set_parameters()
+            if active_types:
+                number = event.key - pygame.K_0
+                NUM_TYPES =number
+                if NUM_TYPES>types_limit:
+                    NUM_TYPES = types_limit
+                if NUM_TYPES<1:
+                    NUM_TYPES = 1
+                #Recreates all the particles with the updated value for the types of particles
+                types = np.random.randint(0, NUM_TYPES, NUM_PARTICLES)
+                forces, min_distances, radii = set_parameters()
+                    
+            if active_force:
+                if event.key == pygame.K_BACKSPACE:
+                    force = int(force/10)
+                else:
+                    number = event.key - pygame.K_0
+                    force = (force*10)+number
+                    if force>types_limit:
+                        types = types_limit #################################### Control Panel UI stuff ends here
+            if event.key == pygame.K_r:
+                forces, min_distances, radii = set_parameters()
+            elif event.key == pygame.K_ESCAPE:
+                running = False
+        ######################### <Control Panel>
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if textbox_noofpart.collidepoint(event.pos): 
+                active_particles = True
+                active_types = False
+                active_force = False
+                
+            elif textbox_typespart.collidepoint(event.pos):
+                active_particles = False
+                active_types = True
+                active_force = False
 
-        for i in range(NUM_PARTICLES):
-            color = pygame.Color(0)
-            color.hsva = (types[i] * COLOR_STEP, 100, 100, 100)
-            pygame.draw.circle(particles_display, color, (int(positions[i, 0]), int(positions[i, 1])), RADIUS)
-            
-        screen.blit(particles_display, (WIDTH/6,0))
-        screen.blit(control_panel, (0,0))
-        
-        pygame.display.flip()
-        clock.tick(60)  # Limit to 60 FPS
+            elif textbox_force.collidepoint(event.pos):
+                active_force= True
+                active_particles = False
+                active_types = False
+            else:
+                active_particles = False
+                active_types = False
+                active_force = False
+    ##################################### </Control Panel>
+    particles_display.fill((0, 0, 0))  # Clear screen with black
+    update_display()
+    positions, velocities = update_particles(positions, velocities, types, forces, min_distances, radii)
+
+    for i in range(NUM_PARTICLES):
+        color = pygame.Color(0)
+        color.hsva = (types[i] * COLOR_STEP, 100, 100, 100)
+        pygame.draw.circle(particles_display, color, (int(positions[i, 0]), int(positions[i, 1])), RADIUS)
     
-    pygame.quit()
-main(NUM_PARTICLES)
+    screen.blit(particles_display, (WIDTH/6,0))
+    screen.blit(control_panel, (0,0))
+    
+    pygame.display.flip()
+    clock.tick(60)  # Limit to 60 FPS
+
+pygame.quit()
+#main(NUM_PARTICLES)
