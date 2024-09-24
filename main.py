@@ -129,6 +129,12 @@ pygame.draw.rect(control_panel, (75,84,92), textbox_force)
 control_panel.blit(text_force, (5,50))
 control_panel.blit(text_force_input, (textbox_force.x + 5, textbox_force.y +5))
 
+#Big bang
+text_bang = font.render('Big bang!', False, font_color)
+box_bang = pygame.Rect(60, 120, 70, 20)
+pygame.draw.rect(control_panel, (75,84,92), box_bang)
+control_panel.blit(text_bang, (box_bang.x+5, box_bang.y+5))
+
 #Overall blitting control panel on the window
 screen.blit(control_panel, (0,0))
 
@@ -154,7 +160,11 @@ def update_display():
     control_panel.blit(text_force_input, (textbox_force.x + 5, textbox_force.y+ 5))
     control_panel.blit(text_force, (5,80))
     
-    
+    #Big bang
+    text_bang = font.render('Big bang!', False, font_color)
+    box_bang = pygame.Rect(60, 120, 70, 20)
+    pygame.draw.rect(control_panel, (75,84,92), box_bang)
+    control_panel.blit(text_bang, (box_bang.x+5, box_bang.y+5))
     
 
 ############################################################################################################################3
@@ -240,6 +250,9 @@ while running:
                 active_particles = False
                 active_types = False
                 active_force = False
+            if box_bang.collidepoint(event.pos):
+                positions=np.full((NUM_PARTICLES,2) , (HEIGHT/2,WIDTH/2))
+                
     ##################################### </Control Panel>
     particles_display.fill((0, 0, 0))  # Clear screen with black
     update_display()
