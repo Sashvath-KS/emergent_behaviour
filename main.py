@@ -12,11 +12,12 @@ COLOR_STEP = 360 // NUM_TYPES
 NUM_PARTICLES = 2000
 particles_limit = 2000
 K = 0.05
-force = 10
-force_limit = 9999999
+
+
 FRICTION = 0.85
 RADIUS = 2
-
+fps = 60
+fps_limit = 120
 #Initializing pygame
 
 pygame.init()
@@ -120,14 +121,14 @@ control_panel.blit(text_typespart, (5,50))
 control_panel.blit(text_types_input, (textbox_typespart.x + 5, textbox_typespart.y +5))
 
 #Force 
-text_force = font.render('Force:' , False, font_color) 
-text_force_input = font.render(str(force), False, font_color)
-textbox_force = pygame.Rect(120,80, 60,20)
-active_force = False
+text_fps = font.render('FPS:' , False, font_color) 
+text_fps_input = font.render(str(fps), False, font_color)
+textbox_fps = pygame.Rect(120,80, 60,20)
+active_fps = False
 
-pygame.draw.rect(control_panel, (75,84,92), textbox_force)
-control_panel.blit(text_force, (5,50))
-control_panel.blit(text_force_input, (textbox_force.x + 5, textbox_force.y +5))
+pygame.draw.rect(control_panel, (75,84,92), textbox_fps)
+control_panel.blit(text_fps, (5,50))
+control_panel.blit(text_fps_input, (textbox_fps.x + 5, textbox_fps.y +5))
 
 #Big bang
 text_bang = font.render('Big bang!', False, font_color)
@@ -154,11 +155,11 @@ def update_display():
     control_panel.blit(text_types_input, (textbox_typespart.x + 5, textbox_typespart.y+ 5))
     control_panel.blit(text_typespart, (5,50))
 
-    #Update display for force
-    pygame.draw.rect(control_panel, (75,84,92), textbox_force)
-    text_force_input = font.render(str(force), False, font_color)
-    control_panel.blit(text_force_input, (textbox_force.x + 5, textbox_force.y+ 5))
-    control_panel.blit(text_force, (5,80))
+    #Update display for fps
+    pygame.draw.rect(control_panel, (75,84,92), textbox_fps)
+    text_fps_input = font.render(str(fps), False, font_color)
+    control_panel.blit(text_fps_input, (textbox_fps.x + 5, textbox_fps.y+ 5))
+    control_panel.blit(text_fps, (5,80))
     
     #Big bang
     text_bang = font.render('Big bang!', False, font_color)
@@ -172,7 +173,7 @@ def update_display():
 #def main(NUM_PARTICLES):
     
 #To fix the error
-active_force = False
+active_fps = False
 active_particles = False
 active_types = False
 
@@ -218,14 +219,15 @@ while running:
                 types = np.random.randint(0, NUM_TYPES, NUM_PARTICLES)
                 forces, min_distances, radii = set_parameters()
                     
-            if active_force:
+            if active_fps:
                 if event.key == pygame.K_BACKSPACE:
-                    force = int(force/10)
+                    fps = int(fps/10)
                 else:
                     number = event.key - pygame.K_0
-                    force = (force*10)+number
-                    if force>types_limit:
-                        types = types_limit #################################### Control Panel UI stuff ends here
+                    fps = (fps*10)+number
+                    if fps>fps_limit:
+                        fps = fps_limit #################################### Control Panel UI stuff ends here
+                
             if event.key == pygame.K_r:
                 forces, min_distances, radii = set_parameters()
             elif event.key == pygame.K_ESCAPE:
@@ -235,39 +237,40 @@ while running:
             if textbox_noofpart.collidepoint(event.pos): 
                 active_particles = True
                 active_types = False
-                active_force = False
+                active_fps = False
                 
             elif textbox_typespart.collidepoint(event.pos):
                 active_particles = False
                 active_types = True
-                active_force = False
+                active_fps = False
 
-            elif textbox_force.collidepoint(event.pos):
-                active_force= True
+            elif textbox_fps.collidepoint(event.pos):
+                active_fps= True
                 active_particles = False
                 active_types = False
             else:
                 active_particles = False
                 active_types = False
-                active_force = False
+                active_fps = False
             if box_bang.collidepoint(event.pos):
                 positions=np.full((NUM_PARTICLES,2) , (HEIGHT/2,WIDTH/2))
                 
     ##################################### </Control Panel>
-    particles_display.fill((0, 0, 0))  # Clear screen with black
     update_display()
-    positions, velocities = update_particles(positions, velocities, types, forces, min_distances, radii)
+    if fps is not 0:
+        particles_display.fill((0, 0, 0))  # Clear screen with black
+        positions, velocities = update_particles(positions, velocities, types, forces, min_distances, radii)
 
-    for i in range(NUM_PARTICLES):
-        color = pygame.Color(0)
-        color.hsva = (types[i] * COLOR_STEP, 100, 100, 100)
-        pygame.draw.circle(particles_display, color, (int(positions[i, 0]), int(positions[i, 1])), RADIUS)
+        for i in range(NUM_PARTICLES):
+            color = pygame.Color(0)
+            color.hsva = (types[i] * COLOR_STEP, 100, 100, 100)
+            pygame.draw.circle(particles_display, color, (int(positions[i, 0]), int(positions[i, 1])), RADIUS)
     
     screen.blit(particles_display, (WIDTH/6,0))
     screen.blit(control_panel, (0,0))
     
     pygame.display.flip()
-    clock.tick(60)  # Limit to 60 FPS
+    clock.tick(fps)  # Limit to 60 FPS
 
 pygame.quit()
 #main(NUM_PARTICLES)
