@@ -1,8 +1,7 @@
 import pygame
 import numpy as np
 from numba import jit
-
-
+from pygame import mixer
 
 # Constants
 WIDTH, HEIGHT = 1200, 800
@@ -12,6 +11,7 @@ COLOR_STEP = 360 // NUM_TYPES
 NUM_PARTICLES = 2000
 particles_limit = 2000
 K = 0.05
+start = 100
 
 
 FRICTION = 0.85
@@ -20,16 +20,23 @@ fps = 60
 fps_limit = 120
 #Initializing pygame
 
+pygame.mixer.pre_init()
 pygame.init()
+mixer.init()
+
+#music variables
+music_state = {"sun mother" : False, "ultimate" : True, "is playing" : False, "cornfield chase" : False}
 
 # Set up the display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 particles_display = pygame.Surface((5*WIDTH/6 , HEIGHT))
 pygame.display.set_caption("emergent-behaviour")
 clock = pygame.time.Clock()
+start_surf = pygame.image.load("bg.jpg").convert_alpha()
+
+
 
 @jit(nopython=True)
-
 
 
 def update_particles(positions, velocities, types, forces, min_distances, radii):
@@ -83,6 +90,13 @@ def update_particles(positions, velocities, types, forces, min_distances, radii)
 
     return new_positions, new_velocities
 
+#music initialisation
+
+pygame.mixer.music.load("sun mother.mp3")
+pygame.mixer.music.set_volume(1)
+pygame.mixer.music.play(-1)
+
+
 def set_parameters():
     forces = np.random.uniform(0.3, 1, (NUM_TYPES, NUM_TYPES))
     mask = np.random.random((NUM_TYPES, NUM_TYPES)) < 0.5
@@ -91,6 +105,7 @@ def set_parameters():
     radii = np.random.uniform(70, 250, (NUM_TYPES, NUM_TYPES))
     return forces, min_distances, radii
 
+    
 ###############################################################################################################
 ### The actual control panel UI ####
 bg_color = (43, 41, 41)
@@ -113,14 +128,15 @@ control_panel.blit(text_particles_input, (textbox_noofpart.x + 5, textbox_noofpa
 #Types of particles
 text_typespart = font.render('Types of particles:' , False, font_color) 
 text_types_input = font.render(str(NUM_TYPES), False, font_color)
-textbox_typespart = pygame.Rect(120,50, 60,20)
+textbox_typespart = pygame.Rect(120, 50, 60, 20)
 active_types = False
+
 
 pygame.draw.rect(control_panel, (75,84,92), textbox_typespart)
 control_panel.blit(text_typespart, (5,50))
 control_panel.blit(text_types_input, (textbox_typespart.x + 5, textbox_typespart.y +5))
 
-#Force 
+#Force
 text_fps = font.render('FPS:' , False, font_color) 
 text_fps_input = font.render(str(fps), False, font_color)
 textbox_fps = pygame.Rect(120,80, 60,20)
@@ -190,6 +206,63 @@ forces, min_distances, radii = set_parameters()
 running = True
 
 while running:
+
+    keys = pygame.key.get_pressed()
+
+    if keys[pygame.K_1]:
+        if not music_state["sun mother"]:
+            music_state["sun_mother"] = True
+            music_state["ultimate"] = False
+            music_state["corfield chase"] = False
+            pygame.mixer.music.load('Sun Mother.mp3')
+            pygame.mixer.music.set_volume(1)
+            pygame.mixer.music.play(-1)
+            music_state["is playing"] = True
+        elif music_state["is playing"]:
+            pygame.mixer.music.pause()
+            music_state["is playing"] = False
+        else:
+            pygame.mixer.music.unpause()
+            music_state["is playing"] = True
+
+    if keys[pygame.K_2]:
+        if not music_state["ultimate"]:
+            music_state["ultimate"] = True
+            music_state["sun mother"] = False
+            music_state["cornfield chase"] = False
+            pygame.mixer.music.load('ultimate.mp3')
+            pygame.mixer.music.set_volume(1)
+            pygame.mixer.music.play(-1)
+            music_state["is playing"] = True
+        elif music_state["is playing"]:
+            music_state["is playing"] = False
+            pygame.mixer.music.pause()
+        else:
+            music_state["is playing"] = True
+            pygame.mixer.music.unpause()
+
+    if keys[pygame.K_3]:
+        if not music_state["cornfield chase"]:
+            music_state["cornfield chase"] = True
+            music_state["sun mother"] = False
+            music_state["ultimate"] = False
+            pygame.mixer.music.load('music.mp3')
+            pygame.mixer.music.set_volume(1)
+            pygame.mixer.music.play(-1)
+            music_state["is playing"] = True
+        elif music_state["is playing"]:
+            music_state["is playing"] = False
+            pygame.mixer.music.pause()
+        else:
+            music_state["is playing"] = True
+            pygame.mixer.music.unpause()
+
+
+        
+
+
+
+         
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -256,8 +329,16 @@ while running:
                 positions=np.full((NUM_PARTICLES,2) , (HEIGHT/2,WIDTH/2))
                 
     ##################################### </Control Panel>
+    
+    while start >= 0:
+            screen.blit(start_surf, (0,0))
+            pygame.display.update()
+            start -= 1
+            clock.tick(60)
+
+
     update_display()
-    if fps is not 0:
+    if fps != 0:
         particles_display.fill((0, 0, 0))  # Clear screen with black
         positions, velocities = update_particles(positions, velocities, types, forces, min_distances, radii)
 
@@ -265,6 +346,7 @@ while running:
             color = pygame.Color(0)
             color.hsva = (types[i] * COLOR_STEP, 100, 100, 100)
             pygame.draw.circle(particles_display, color, (int(positions[i, 0]), int(positions[i, 1])), RADIUS)
+    
     
     screen.blit(particles_display, (WIDTH/6,0))
     screen.blit(control_panel, (0,0))
