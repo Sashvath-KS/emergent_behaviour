@@ -6,12 +6,13 @@ from pygame import mixer
 # Constants
 WIDTH, HEIGHT = 1200, 800
 NUM_TYPES = 6
-types_limit = 5
+types_limit = 6
 COLOR_STEP = 360 // NUM_TYPES
 NUM_PARTICLES = 2000
 particles_limit = 2000
-K = 0.05
-start = 100
+K = 0.01
+#0.05
+
 
 
 FRICTION = 0.85
@@ -25,7 +26,7 @@ pygame.init()
 mixer.init()
 
 #music variables
-music_state = {"sun mother" : False, "ultimate" : True, "is playing" : False, "cornfield chase" : False}
+music_state = {"sun mother" : True, "ultimate" : False, "is playing" : False, "cornfield chase" : False}
 
 # Set up the display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -199,74 +200,66 @@ velocities = np.zeros((NUM_PARTICLES, 2))
 types = np.random.randint(0, NUM_TYPES, NUM_PARTICLES)
 forces, min_distances, radii = set_parameters()
 
-
+flag1 = True
 
 
 # Main game loop
 running = True
 
 while running:
-
     keys = pygame.key.get_pressed()
-
-    if keys[pygame.K_1]:
-        if not music_state["sun mother"]:
-            music_state["sun_mother"] = True
-            music_state["ultimate"] = False
-            music_state["corfield chase"] = False
-            pygame.mixer.music.load('Sun Mother.mp3')
-            pygame.mixer.music.set_volume(1)
-            pygame.mixer.music.play(-1)
-            music_state["is playing"] = True
-        elif music_state["is playing"]:
-            pygame.mixer.music.pause()
-            music_state["is playing"] = False
-        else:
-            pygame.mixer.music.unpause()
-            music_state["is playing"] = True
-
-    if keys[pygame.K_2]:
-        if not music_state["ultimate"]:
-            music_state["ultimate"] = True
-            music_state["sun mother"] = False
-            music_state["cornfield chase"] = False
-            pygame.mixer.music.load('ultimate.mp3')
-            pygame.mixer.music.set_volume(1)
-            pygame.mixer.music.play(-1)
-            music_state["is playing"] = True
-        elif music_state["is playing"]:
-            music_state["is playing"] = False
-            pygame.mixer.music.pause()
-        else:
-            music_state["is playing"] = True
-            pygame.mixer.music.unpause()
-
-    if keys[pygame.K_3]:
-        if not music_state["cornfield chase"]:
-            music_state["cornfield chase"] = True
-            music_state["sun mother"] = False
-            music_state["ultimate"] = False
-            pygame.mixer.music.load('music.mp3')
-            pygame.mixer.music.set_volume(1)
-            pygame.mixer.music.play(-1)
-            music_state["is playing"] = True
-        elif music_state["is playing"]:
-            music_state["is playing"] = False
-            pygame.mixer.music.pause()
-        else:
-            music_state["is playing"] = True
-            pygame.mixer.music.unpause()
-
-
-        
-
-
-
-         
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN: 
+            if event.key == pygame.K_q:
+                if not music_state["sun mother"]:
+                    music_state["sun_mother"] = True
+                    music_state["ultimate"] = False
+                    music_state["corfield chase"] = False
+                    pygame.mixer.music.load('Sun Mother.mp3')
+                    pygame.mixer.music.set_volume(1)
+                    pygame.mixer.music.play(-1)
+                    music_state["is playing"] = True
+                elif music_state["is playing"]:
+                    pygame.mixer.music.pause()
+                    music_state["is playing"] = False
+                else:
+                    pygame.mixer.music.unpause()
+                    music_state["is playing"] = True
+
+            if event.key == pygame.K_w:
+                if not music_state["ultimate"]:
+                    music_state["ultimate"] = True
+                    music_state["sun mother"] = False
+                    music_state["cornfield chase"] = False
+                    pygame.mixer.music.load('ultimate.mp3')
+                    pygame.mixer.music.set_volume(1)
+                    pygame.mixer.music.play(-1)
+                    music_state["is playing"] = True
+                elif music_state["is playing"]:
+                    music_state["is playing"] = False
+                    pygame.mixer.music.pause()
+                else:
+                    music_state["is playing"] = True
+                    pygame.mixer.music.unpause()
+
+            if event.key == pygame.K_e:
+                if not music_state["cornfield chase"]:
+                    music_state["cornfield chase"] = True
+                    music_state["sun mother"] = False
+                    music_state["ultimate"] = False
+                    pygame.mixer.music.load('music_new.mp3')
+                    pygame.mixer.music.set_volume(1)
+                    pygame.mixer.music.play(-1)
+                    music_state["is playing"] = True
+                elif music_state["is playing"]:
+                    music_state["is playing"] = False
+                    pygame.mixer.music.pause()
+                else:
+                    music_state["is playing"] = True
+                    pygame.mixer.music.unpause()
+
             if active_particles:####################################################   Control Panel UI Stuff starts here
                 
                 if event.key == pygame.K_BACKSPACE:
@@ -330,11 +323,14 @@ while running:
                 
     ##################################### </Control Panel>
     
-    while start >= 0:
+        while flag1:
             screen.blit(start_surf, (0,0))
             pygame.display.update()
-            start -= 1
-            clock.tick(60)
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    flag1 = False
+
+
 
 
     update_display()
